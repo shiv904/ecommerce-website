@@ -11,15 +11,15 @@ do $$ begin
 exception when others then null; end $$;
 
 -- Helper: parse UUID from settings
-create or replace function app_current_school_id() returns uuid language sql immutable parallel safe as $$
+create or replace function app_current_school_id() returns uuid language sql stable parallel safe as $$
   select nullif(current_setting('app.school_id', true), '')::uuid
 $$;
 
-create or replace function app_current_user_id() returns uuid language sql immutable parallel safe as $$
+create or replace function app_current_user_id() returns uuid language sql stable parallel safe as $$
   select nullif(current_setting('app.user_id', true), '')::uuid
 $$;
 
-create or replace function app_current_role() returns text language sql immutable parallel safe as $$
+create or replace function app_current_role() returns text language sql stable parallel safe as $$
   select nullif(current_setting('app.role', true), '')
 $$;
 

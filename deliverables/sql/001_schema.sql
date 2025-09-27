@@ -2,6 +2,7 @@
 -- Multitenant by `school_id` with RLS-ready design
 
 create extension if not exists pgcrypto;
+create extension if not exists citext;
 
 -- Tenancy anchor
 create table if not exists school (
