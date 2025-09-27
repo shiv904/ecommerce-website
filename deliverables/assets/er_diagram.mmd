@@ -1,0 +1,165 @@
+erDiagram
+    SCHOOL ||--o{ USER : has
+    SCHOOL ||--o{ STUDENT : has
+    SCHOOL ||--o{ CLASSROOM : offers
+    SCHOOL ||--o{ ASSESSMENT : configures
+
+    USER ||--|| STAFF_PROFILE : if_staff
+    USER ||--|| PARENT_PROFILE : if_parent
+    USER ||--o{ SESSION : creates
+    USER ||--o{ COMMUNICATION : sends
+    USER ||--o{ AUDIT_LOG : actor
+
+    PARENT_PROFILE }o--o{ STUDENT : guardian_of
+    STUDENT ||--o{ ENROLLMENT : has
+    CLASSROOM ||--o{ ENROLLMENT : includes
+    CLASSROOM ||--o{ ATTENDANCE : records
+    STUDENT ||--o{ ATTENDANCE : marked_on
+    CLASSROOM ||--o{ ASSESSMENT : contains
+    ASSESSMENT ||--o{ GRADE : produces
+    STUDENT ||--o{ GRADE : earns
+    PARENT_PROFILE ||--o{ COMMUNICATION : receives
+
+    SCHOOL {
+        uuid id PK
+        string name
+        string code UNIQUE
+        string timezone
+        timestamp created_at
+    }
+
+    USER {
+        uuid id PK
+        uuid school_id FK
+        string email
+        string password_hash
+        string user_kind  "staff|parent"
+        boolean mfa_enabled
+        timestamp last_login_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    STAFF_PROFILE {
+        uuid user_id PK, FK
+        uuid school_id FK
+        string role  "principal|teacher|admin"
+        string full_name
+    }
+
+    PARENT_PROFILE {
+        uuid user_id PK, FK
+        uuid school_id FK
+        string full_name
+        bytes phone_encrypted
+        bytes address_encrypted
+        string encryption_key_id
+    }
+
+    STUDENT {
+        uuid id PK
+        uuid school_id FK
+        string external_student_number
+        string full_name
+        date dob
+        string gender
+        bytes personal_info_encrypted
+        string encryption_key_id
+        timestamp created_at
+    }
+
+    STUDENT_PARENT {
+        uuid school_id FK
+        uuid student_id FK
+        uuid parent_user_id FK
+        string relationship  "mother|father|guardian"
+        timestamp linked_at
+    }
+
+    CLASSROOM {
+        uuid id PK
+        uuid school_id FK
+        string name
+        string subject
+        string grade_level
+        string section
+        string academic_year
+        uuid teacher_user_id FK
+        timestamp created_at
+    }
+
+    ENROLLMENT {
+        uuid id PK
+        uuid school_id FK
+        uuid class_id FK
+        uuid student_id FK
+        date enrolled_on
+        boolean active
+    }
+
+    ATTENDANCE {
+        uuid id PK
+        uuid school_id FK
+        uuid class_id FK
+        uuid student_id FK
+        date class_date
+        string status  "present|absent|late|excused"
+        uuid recorded_by_user_id FK
+        timestamp created_at
+    }
+
+    ASSESSMENT {
+        uuid id PK
+        uuid school_id FK
+        uuid class_id FK
+        string title
+        string category  "test|quiz|assignment|exam|project"
+        numeric max_score
+        date due_date
+        numeric weight_percent
+        timestamp created_at
+    }
+
+    GRADE {
+        uuid id PK
+        uuid school_id FK
+        uuid assessment_id FK
+        uuid student_id FK
+        numeric score
+        timestamp graded_at
+        uuid graded_by_user_id FK
+    }
+
+    COMMUNICATION {
+        uuid id PK
+        uuid school_id FK
+        uuid to_parent_user_id FK
+        uuid from_user_id FK
+        string channel  "sms|email|push|call"
+        string subject
+        string message_excerpt
+        timestamp sent_at
+    }
+
+    SESSION {
+        uuid id PK
+        uuid school_id FK
+        uuid user_id FK
+        string jwt_id
+        timestamp created_at
+        timestamp expires_at
+        string ip
+        string user_agent
+    }
+
+    AUDIT_LOG {
+        uuid id PK
+        uuid school_id FK
+        uuid actor_user_id FK
+        string action
+        string resource_type
+        uuid resource_id
+        jsonb details
+        timestamp created_at
+    }
+
